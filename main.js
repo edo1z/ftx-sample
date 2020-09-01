@@ -1,15 +1,15 @@
-const ftx = require('./ftxApi')
+const ftx = require('./ftx/apiClient')
+const { connect } = require('./ftx/webSocketClient')
 
 const main = async () => {
-  try {
-    const res = await ftx.getAllSubAccounts()
-    console.log(res.data.result)
-  } catch (err) {
-    const status = err.response.status
-    const statusText = err.response.statusText
-    const message = err.response.data.error
-    console.log(status, statusText, message)
-  }
+  const subscriptions = [
+    { channel: 'ticker', market: 'ETH-PERP' },
+    { channel: 'ticker', market: 'LINK-PERP' },
+    { channel: 'ticker', market: 'DOT-PERP' },
+    { channel: 'fills', market: null },
+    { channel: 'orders', market: null },
+  ]
+  connect({ subscriptions: subscriptions })
 }
 
 main()
