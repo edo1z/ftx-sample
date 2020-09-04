@@ -8,6 +8,7 @@ const apiSecretKey = process.env.API_SECRET_KEY
 const url = 'wss://ftx.com/ws'
 let ws = null
 let pongAt = null
+let onmessageFunc = null
 let pingInterval = null
 let pingIntervalTime = 15000
 let subscriptions = []
@@ -21,6 +22,9 @@ const connect = (config = null) => {
     }
     if ('subaccount' in config) {
       subaccount = config.subaccount
+    }
+    if ('onmessage' in config) {
+      onmessageFunc = config.onmessage
     }
   }
   ws = new WebSocket(url)
@@ -43,12 +47,12 @@ const onopen = () => {
 }
 
 const onmessage = (e) => {
-  console.log(e.data)
   try {
     const data = JSON.parse(e.data)
-    switch (data.type) {
-      case 'pong':
-        pongAt = moment()
+    if (data.type === 'pong') {
+      pongAt = moment()
+    } else {
+      onmessageFunc(data)
     }
   } catch (err) {
     return
