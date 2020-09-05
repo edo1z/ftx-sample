@@ -2,9 +2,11 @@ const ftx = require('./ftx/apiClient')
 const conf = require('./config/index')
 const {init:initStatus, statuses} = require('./statuses')
 const { connect } = require('./ftx/webSocketClient')
-const { init: initOrder, noOrder } = require('./data/order')
-const { init: initPosi, noPosi } = require('./data/position')
+const { init: initOrder, setOrder, noOrder } = require('./data/order')
+const { init: initPosi, setPosiFromFill, noPosi } = require('./data/position')
 const { init: initTick, setTick } = require('./data/tick')
+const {canOrder} = require('./rules/order')
+const {order} = require('./actions/order')
 
 const main = async () => {
   _init()
@@ -41,16 +43,16 @@ const _onMessage = async (data) => {
 
 const _onTick = async (data) => {
   setTick(data.market, data.data)
-  await _actionsOnTick(data.market, data.data).catch(e => console.log(e))
+  await _actionsOnTick(data.market, data.data)
 }
 
 const _onOrder = (data) => {
-  // orderData.setOrder(data.data)
+  setOrder(data.data)
 }
 
 const _onFill = async (data) => {
-  // positionData.setFill(data.data)
-  // _actionsOnFill(data)
+  setPosiFromFill(data.data)
+  _actionsOnFill(data.market, data.data)
 }
 
 const _actionsOnTick = async (market, data) => {
@@ -78,8 +80,11 @@ const _order = () => {
 }
 
 const __actionsOnTick = async (market, data) => {
-  // order - no posi && no order
-  if (noPosi(market) && noOrder(market) && orderRule()) return await _order()
+  if (noPosi(market) && noOrder(market)) {
+    const orderInfo = canOrder(market, data)
+    if (!orderInfo) return
+    await order(orderInfo)
+  }
 
   // cancelOrdre - cancel rule && not canceling
   // if (cancelRule('order') && notCanceling('counterOrder'))
@@ -94,8 +99,7 @@ const __actionsOnTick = async (market, data) => {
 }
 
 const __actionsOnFill = async (market, data) => {
-  // counterOrder
-  // if (canCounterOrder()) counterOrder()
+  if (canCounterOrder()) counterOrder()
 }
 
 main()

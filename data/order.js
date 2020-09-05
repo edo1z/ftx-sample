@@ -18,7 +18,7 @@ const getOpenOrders = async (market) => {
   setTimeout(getOpenOrders, 1000)
 }
 
-const noOrder = market => (_orderNumber(market) > 0)
+const noOrder = market => (_orderNumber(market) <= 0)
 
 const setOrder = (data, type = null) => {
   if (data.id in orders[data.market]) {

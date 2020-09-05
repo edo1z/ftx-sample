@@ -24,7 +24,7 @@ const noPosi = (market) => positions[market].size <= 0
 const _init = (market) =>
   (positions[market] = { side: null, size: 0, price: 0, profit: 0 })
 
-const setFill = (data) => {
+exports.setPosiFromFill = (data) => {
   _displayFill(data)
   const orderType = orderData.orders[data.market][data.orderId].type
   if (orderType === 'order') {
@@ -63,4 +63,3 @@ exports.positions = positions
 exports.isPosi = isPosi
 exports.noPosi = noPosi
 exports.init = init
-exports.setFill = setFill
