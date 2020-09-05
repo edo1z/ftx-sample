@@ -1,3 +1,4 @@
+const ftx = require('../ftx/apiClient')
 const orderData = require('./order')
 
 const positions = {}
@@ -7,13 +8,13 @@ const init = (markets) => {
     (market) =>
       (positions[market] = { side: null, size: 0, price: 0, profit: 0 }),
   )
-  getPositions()
+  // getPositions()
 }
 
 const getPositions = async () => {
-  const nowPositions = await ftx.getPositions().catch(ftx.error)
-  console.log('nowPositions', nowPositions)
-  nowPositions.forEach(posi => positions[posi.future] = posi)
+  const res = await ftx.getPositions().catch(ftx.err)
+  console.log(res.data)
+  res.data.result.forEach(posi => positions[posi.future] = posi)
   setTimeout(getPositions, 1000)
 }
 

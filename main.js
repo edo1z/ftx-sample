@@ -1,21 +1,18 @@
 const ftx = require('./ftx/apiClient')
-const { connect } = require('./ftx/webSocketClient')
 const conf = require('./config/index')
+const {init:initStatus, statuses} = require('./statuses')
+const { connect } = require('./ftx/webSocketClient')
 const { init: initOrder, noOrder } = require('./data/order')
 const { init: initPosi, noPosi } = require('./data/position')
 const { init: initTick, setTick } = require('./data/tick')
-const statuses = require('./statuses')
 
 const main = async () => {
-  const nowOrders = await ftx.getOpenOrders('ETH-PERP').catch(ftx.err)
-  console.log(nowOrders.data.result)
-  // _init()
-  // _subscribe()
+  _init()
+  _subscribe()
 }
 
 const _init = () => {
-  console.log(conf)
-  statuses.init(conf.markets)
+  initStatus(conf.markets)
   initOrder(conf.markets)
   initPosi(conf.markets)
   initTick(conf.markets)
@@ -26,7 +23,7 @@ const _subscribe = () => {
     { channel: 'orders', market: null },
     { channel: 'fills', market: null },
   ]
-  targetMarkets.forEach((market) => {
+  conf.markets.forEach((market) => {
     subscriptions.push({ channel: 'ticker', market: market })
   })
   connect({
@@ -37,14 +34,14 @@ const _subscribe = () => {
 
 const _onMessage = async (data) => {
   if (data.type !== 'update') return console.log(data)
-  if (data.channel === 'ticker') await _onTick(data)
+  if (data.channel === 'ticker') _onTick(data)
   else if (data.channel === 'orders') _onOrder(data)
-  else if (data.channel === 'fills') _onFill(data)
+  else if (data.channel === 'fills')  _onFill(data)
 }
 
 const _onTick = async (data) => {
   setTick(data.market, data.data)
-  _actionsOnTick(data.market, data.data)
+  await _actionsOnTick(data.market, data.data).catch(e => console.log(e))
 }
 
 const _onOrder = (data) => {
@@ -82,7 +79,7 @@ const _order = () => {
 
 const __actionsOnTick = async (market, data) => {
   // order - no posi && no order
-  if (noPosi() && noOrder() && orderRule()) return await _order()
+  if (noPosi(market) && noOrder(market) && orderRule()) return await _order()
 
   // cancelOrdre - cancel rule && not canceling
   // if (cancelRule('order') && notCanceling('counterOrder'))

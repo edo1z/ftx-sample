@@ -8,14 +8,13 @@ const orders = {}
 const init = (markets) => {
   markets.forEach((market) => {
     orders[market] = {}
-    getOpenOrders(market)
+    // getOpenOrders(market)
   })
 }
 
 const getOpenOrders = async (market) => {
-  const nowOrders = await ftx.getOpenOrders(market).catch(ftx.error)
-  console.log('nowOrders', nowOrders)
-  orders[market] = nowOrders
+  const res = await ftx.getOpenOrders(market).catch(ftx.err)
+  orders[market] = res.data.result
   setTimeout(getOpenOrders, 1000)
 }
 

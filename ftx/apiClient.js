@@ -48,11 +48,11 @@ exports.cancelAllOrders = async () => {
   return await request('DELETE', '/orders', null, true)
 }
 
-exports.positions = async () => {
-  request('GET', '/positions', null, true)
+exports.getPositions = async () => {
+  return await request('GET', '/positions', null, true)
 }
 
-exports.filss = async (market) => {
+exports.getFilss = async (market) => {
   const data = {market: market}
   return await request('GET', '/fills', data, true)
 }
