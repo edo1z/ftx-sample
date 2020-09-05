@@ -22,7 +22,6 @@ const request = async (method, path, data, auth) => {
       'Content-Type': 'application/json',
     },
   }
-  if (method === 'GET') options.params = data
   if (auth) {
     const sign = createSign(ts, method, path, body)
     options.headers['FTX-KEY'] = apiKey

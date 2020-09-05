@@ -19,6 +19,21 @@ exports.order = async (orderInfo) => {
   return await request('POST', '/orders', order, true)
 }
 
+exports.getOpenOrders = async (market) => {
+  const data = {market: market}
+  return await request('GET', '/orders', data, true)
+}
+
+exports.getOrderHistory = async (market) => {
+  const data = {market: market}
+  return await request('GET', '/orders/history', data, true)
+}
+
+exports.getOrderStatus = async (orderId) => {
+  const path = '/orders/' + orderId
+  return await request('GET', path, null, true)
+}
+
 exports.modifyOrder = async (orderId, data) => {
   const path = '/orders/' + orderId + '/modify'
   return await request('POST', path, data, true)
@@ -37,10 +52,15 @@ exports.positions = async () => {
   request('GET', '/positions', null, true)
 }
 
-_error = (err, exit = false) => {
+exports.filss = async (market) => {
+  const data = {market: market}
+  return await request('GET', '/fills', data, true)
+}
+
+_err = (err, exit) => {
   const res = err.response
-  console.log(`[${res.status} - ${res.statusText}] ${res.data.error}`)
+  console.log(`[${res.status} - ${res.statusText}] ${res.data.error} - ${res.config.url}`)
   if (exit) process.exit(1)
 }
-exports.error = (err) => _error(err)
-exports.errorExit = (err) => _error(err, true)
+exports.err = (err) => _err(err, false)
+exports.errExit = (err) => _err(err, true)

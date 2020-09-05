@@ -1,12 +1,25 @@
 const moment = require('moment')
+const ftx = require('../ftx/apiClient')
 
 const maxOrderNumber = 50
 const maxSaveMin = 30
 const orders = {}
 
 const init = (markets) => {
-  markets.forEach((market) => (orders[market] = {}))
+  markets.forEach((market) => {
+    orders[market] = {}
+    getOpenOrders(market)
+  })
 }
+
+const getOpenOrders = async (market) => {
+  const nowOrders = await ftx.getOpenOrders(market).catch(ftx.error)
+  console.log('nowOrders', nowOrders)
+  orders[market] = nowOrders
+  setTimeout(getOpenOrders, 1000)
+}
+
+const noOrder = market => (_orderNumber(market) > 0)
 
 const setOrder = (data, type = null) => {
   if (data.id in orders[data.market]) {
@@ -56,40 +69,13 @@ const isOpeningOrder = (market) => {
 }
 
 const getOrderType = (market, id) => orders[market][id].type
-
-const shouldCancelOrders = (
-  market,
-  orderTimeLimit,
-  counterOrderTimeLimit,
-  shouldStopLoss,
-) => {
-  let orderIds = { order: [], counterOrder: [] }
-  if (_orderNumber(market) <= 0) return orderIds
-  for (let key of Object.keys(orders[market])) {
-    const order = orders[market][key]
-    if (order.data.status === 'closed') continue
-    if (order.waiting) continue
-    const timeLimit =
-      order.type === 'order' ? orderTimeLimit : counterOrderTimeLimit
-    if (
-      (shouldStopLoss && order.type === 'counterOrder') ||
-      moment().diff(moment(order.createdAt, 'x')) > timeLimit * 1000
-    ) {
-      orderIds[order.type].push(key)
-      order.waiting = true
-    }
-  }
-  return orderIds
-}
-
 const setWaiting = (market, id) => (orders[market][id].waiting = true)
-const getSide = (market, id) => orders[market][id].data.side
 
 exports.orders = orders
 exports.init = init
+exports.getOpenOrders = getOpenOrders
 exports.setOrder = setOrder
+exports.noOrder = noOrder
 exports.isOpeningOrder = isOpeningOrder
 exports.getOrderType = getOrderType
-exports.shouldCancelOrders = shouldCancelOrders
 exports.setWaiting = setWaiting
-exports.getSide = getSide
