@@ -7,6 +7,7 @@ exports.canStopLoss = (market) => {
   const last = latest(market).last
   if (profit.priceRange < 0) {
     if(Math.abs(profit.priceRange) / last > conf.maxLossRate) {
+      console.log('you can stop loss...', Math.abs(profit.priceRange), last, Math.abs(profit.priceRange) / last, Math.abs(profit.priceRange) / last > conf.maxLossRate)
       return _orderInfo(market)
     }
   }
