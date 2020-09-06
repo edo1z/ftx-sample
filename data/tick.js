@@ -20,14 +20,9 @@ const totalSize = (market) => {
   return { bidSize: bidSize, askSize: askSize }
 }
 
-const lastPrice = (market) => ticks[market][ticks[market].length - 1].last
-const askPrice = (market) => ticks[market][ticks[market].length - 1].ask
-const bidPrice = (market) => ticks[market][ticks[market].length - 1].bid
+exports.latest = (market) => ticks[market][ticks[market].length - 1]
 
 exports.ticks = ticks
 exports.init = init
 exports.setTick = setTick
 exports.totalSize = totalSize
-exports.lastPrice = lastPrice
-exports.askPrice = askPrice
-exports.bidPrice = bidPrice

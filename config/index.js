@@ -4,8 +4,8 @@ module.exports = {
   maxSpreadRate: 0.0005,
   minProfitRate: 0.0005,
   maxLossRate: 0.00025,
-  orderTimeLimit: 20,
-  counterOrderTimeLimit: 60,
+  orderTimeLimit: 10,
+  counterOrderTimeLimit: 10,
   markets: ['ETH-PERP'],
 }
 

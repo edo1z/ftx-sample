@@ -15,25 +15,3 @@ exports.order = async (orderInfo) => {
     await sleep(1000)
   }
 }
-
-const _modifyOrders = async (market, orderIds) => {
-  orderIds.forEach(async (orderId) => {
-    console.log('cancel order for modify', orderId)
-    await ftx.cancelOrder(orderId).catch(ftx.errorExit)
-    console.log('cancel order for modify FIN', orderId)
-    const order = orderData.orders[market][orderId]
-    const side = order.data.side
-    const price = side === 'buy' ?
-      tickData.bidPrice(market) :
-      tickData.askPrice(market)
-    const orderInfo = {
-      side: side,
-      market: market,
-      price: price,
-      size: order.data.remainingSize
-    }
-    console.log('modify order', orderId)
-    const result = await _counterOrder(orderInfo)
-    console.log('modify order FIN', orderId)
-  })
-}

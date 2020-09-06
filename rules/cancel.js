@@ -1,28 +1,16 @@
-exports.canCancelOrder = (market) => {
+const conf = require('../config/index')
+const {getPastOrders} = require('../data/order')
 
+exports.canCancelOrder = (market) => {
+  const timeLimit = conf.orderTimeLimit
+  const pastOrders = getPastOrders(market, timeLimit * 1000)
+  if (!pastOrders || pastOrders.length === 0) return null
+  return pastOrders
 }
 
-const shouldCancelOrders = (
-  market,
-  orderTimeLimit,
-  counterOrderTimeLimit,
-  shouldStopLoss,
-) => {
-  let orderIds = { order: [], counterOrder: [] }
-  if (_orderNumber(market) <= 0) return orderIds
-  for (let key of Object.keys(orders[market])) {
-    const order = orders[market][key]
-    if (order.data.status === 'closed') continue
-    if (order.waiting) continue
-    const timeLimit =
-      order.type === 'order' ? orderTimeLimit : counterOrderTimeLimit
-    if (
-      (shouldStopLoss && order.type === 'counterOrder') ||
-      moment().diff(moment(order.createdAt, 'x')) > timeLimit * 1000
-    ) {
-      orderIds[order.type].push(key)
-      order.waiting = true
-    }
-  }
-  return orderIds
+exports.canCancelCounterOrder = (market) => {
+  const timeLimit = conf.counterOrderTimeLimit
+  const pastCounterOrders = getPastOrders(market, timeLimit * 1000, 'counterOrder')
+  if (!pastCounterOrders || pastCounterOrders.length === 0) return null
+  return pastCounterOrders
 }

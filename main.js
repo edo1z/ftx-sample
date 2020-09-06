@@ -8,10 +8,11 @@ const { init: initPosi, noPosi } = require('./data/position')
 const { init: initTick, setTick } = require('./data/tick')
 const { init: initFill, setFill } = require('./data/fill')
 const { canOrder } = require('./rules/order')
-const {canCounterOrder} = require('./rules/counterOrder')
+const {canCounterOrder, canModifyCounterOrder} = require('./rules/counterOrder')
 const { order } = require('./actions/order')
-const { counterOrder } = require('./actions/counterOrder')
-const { canCancelOrder } = require('./rules/cancel')
+const { counterOrder, modifyCounterOrders } = require('./actions/counterOrder')
+const { canCancelOrder} = require('./rules/cancel')
+const {cancelOrders} = require('./actions/cancel')
 
 const main = async () => {
   _init()
@@ -57,9 +58,10 @@ const _onOrder = (data) => {
 }
 
 const _onFill = async (data) => {
-  setFill(data.data)
   Log.fill.fill(data.data)
   Log.profit.fill(data.data)
+  setFill(data.data)
+  Log.position.now(data.data.market)
   _actionsOnFill(data.data)
 }
 
@@ -74,16 +76,18 @@ const __actionsOnTick = async (market, data) => {
   // order
   if (noPosi(market) && noOrder(market)) {
     const orderInfo = canOrder(market, data)
-    if (!orderInfo) return
-    return await order(orderInfo)
+    if (orderInfo) return await order(orderInfo)
   }
 
   // cancel order
-  if (canCancelOrder(market)) return await cancelOrder(market)
+  const pastOrders = canCancelOrder(market)
+  console.log('cancel order ==> ', pastOrders)
+  if (pastOrders) return await cancelOrders(pastOrders)
 
-  // // cancelCounterOrder - cancelCounterOrderRule && not cancelingCounterOrder
-  // if (cancelRule('counterOrder') && notCanceling('counterOrder'))
-  //   return await cancelCounterOrder()
+  // cancel counter order
+  const counterOrderInfo = canModifyCounterOrder(market)
+  console.log('cancel counter order ==> ', counterOrderInfo)
+  if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
 
   // // StopLoss - stoploss rule && not stoping
   // if (stopLossRule() && notStopping()) return await _stopLoss()

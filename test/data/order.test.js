@@ -1,4 +1,6 @@
-const { noOrder, getOrderCategory, orders } = require('../../data/order')
+const { noOrder, getOrderCategory, orders, getPastOrders } = require('../../data/order')
+const { order } = require('../../ftx/apiClient')
+const moment = require('moment')
 
 test('data.order.noOrder', () => {
   orders.test = [
@@ -29,4 +31,21 @@ test('data.order.getOrderCategory', () => {
   expect(getOrderCategory('test', 1)).toBe('order')
   expect(getOrderCategory('test', 2)).toBe('counterOrder')
   expect(getOrderCategory('test', 3)).toBe(undefined)
+})
+
+test('data.order.getPastOrders', () => {
+  const created = [
+    moment().add(-15, 'seconds').format(),
+    moment().format(),
+    moment().add(-5, 'seconds').format()
+  ]
+  console.log(created[0], created[1], created[2])
+  orders.test = [
+    {id:1, status: 'new', orderCategory: 'order', createdAt: created[0]},
+    {id:2, status: 'new', orderCategory: 'order', createdAt: created[1]},
+    {id:3, status: 'new', orderCategory: 'order', createdAt: created[2]}
+  ]
+  expect(getPastOrders('test', 10000, 'order')).toStrictEqual([
+    {id:1, status: 'new', orderCategory: 'order', createdAt: created[0]}
+  ])
 })
