@@ -1,4 +1,4 @@
-const { getOrderType } = require('./order')
+const { getOrderCategory } = require('./order')
 const { setPosi } = require('./position')
 
 const maxFillLength = 30
@@ -10,10 +10,10 @@ const init = (markets) => {
 
 exports.setFill = (data) => {
   const market = data.market
-  data.orderType = getOrderType(market, data.orderId)
+  data.orderCategory = getOrderCategory(market, data.orderId)
   fills[market].push(data)
   if (fills[market].length > maxFillLength) fills[market].shift()
-  setPosi(data, data.orderType)
+  setPosi(data, data.orderCategory)
 }
 
 exports.fills = fills

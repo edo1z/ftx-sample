@@ -1,8 +1,6 @@
-const ftx = require('../ftx/apiClient')
-
 const positions = {}
 
-const init = (markets) => {
+exports.init = (markets) => {
   markets.forEach(
     (market) =>
       (positions[market] = { side: null, size: 0, price: 0, profit: 0 }),
@@ -12,20 +10,20 @@ const init = (markets) => {
 const _init = (market) =>
   (positions[market] = { side: null, size: 0, price: 0, profit: 0 })
 
-const isPosi = (market) => positions[market].size > 0
-const noPosi = (market) => positions[market].size <= 0
+exports.isPosi = (market) => positions[market].size > 0
+exports.noPosi = (market) => positions[market].size <= 0
+exports.posi = (market) => positions[market]
 
-exports.setPosi = (data, orderType) => {
-  switch (orderType) {
+exports.setPosi = (data, orderCategory) => {
+  switch (orderCategory) {
     case 'order':
       _addToPosition(data)
       break
     case 'counterOrder':
-      _displayProfit(data)
       _minusToPosition(data)
       break
     default:
-      console.log('orderType is not set.')
+      console.log('orderCategory is not set.')
       process.exit(1)
   }
 }
@@ -52,6 +50,3 @@ const _minusToPosition = (data) => {
 }
 
 exports.positions = positions
-exports.isPosi = isPosi
-exports.noPosi = noPosi
-exports.init = init

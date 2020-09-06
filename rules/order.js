@@ -1,6 +1,5 @@
 const conf = require('../config/index')
 const { totalSize } = require('../data/tick')
-const { isOpeningOrder } = require('../data/order')
 
 exports.canOrder = (market, data) => {
   const spreadRate = (data.ask - data.bid) / data.last
@@ -10,23 +9,20 @@ exports.canOrder = (market, data) => {
     tradeAmountDiff * -1 > conf.minTradeAmountDiff &&
     spreadRate < conf.maxSpreadRate
   ) {
-    if (!isOpeningOrder(market)) {
-      return _orderInfo(market, data, 'ask')
-    }
+    return _orderInfo(market, data, 'ask')
   } else if (
     tradeAmountDiff > conf.minTradeAmountDiff &&
     spreadRate < conf.maxSpreadRate
   ) {
-    if (!isOpeningOrder(market)) {
-      return _orderInfo(market, data, 'bid')
-    }
+    return _orderInfo(market, data, 'bid')
   }
   return null
 }
 
 const _orderInfo = (market, data, side) => {
   const price = side === 'ask' ? data.ask : data.bid
-  const size = Math.round((conf.amountPerTransaction / price) * 1000000) / 1000000
+  const size =
+    Math.round((conf.amountPerTransaction / price) * 1000000) / 1000000
   return {
     side: side === 'ask' ? 'sell' : 'buy',
     market: market,

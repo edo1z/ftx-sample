@@ -1,12 +1,18 @@
-const _displayProfit = (data) => {
-  const position = positions[data.market]
+const {posi} = require('../data/position')
+const { getOrderCategory } = require('../data/order')
+
+exports.fill = (fillData) => {
+  const market = fillData.market
+  const orderCategory = getOrderCategory(market, fillData.orderId)
+  if (orderCategory != 'counterOrder') return
+  const position = posi(market)
   let profit
   if (position.side === 'buy') {
-    profit = (data.price - position.price) * data.size
+    profit = (fillData.price - position.price) * fillData.size
   } else {
-    profit = (position.price - data.price) * data.size
+    profit = (position.price - fillData.price) * fillData.size
   }
   console.log(
-    `[${data.market}][PROFIT] SIDE: ${position.side} IN: ${position.price} OUT: ${data.price} SIZE: ${data.size} PROFIT: ${profit}`,
+    `[${fillData.market}][PROFIT] SIDE: ${position.side} IN: ${position.price} OUT: ${fillData.price} SIZE: ${fillData.size} PROFIT: ${profit}`,
   )
 }

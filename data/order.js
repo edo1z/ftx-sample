@@ -1,72 +1,32 @@
-const moment = require('moment')
-const ftx = require('../ftx/apiClient')
-
 const maxOrderNumber = 50
-const maxSaveMin = 30
 const orders = {}
 
-const init = (markets) => {
-  markets.forEach((market) => {
-    orders[market] = {}
-  })
+exports.init = (markets) => {
+  markets.forEach((market) => (orders[market] = []))
 }
 
-const noOrder = market => (_orderNumber(market) <= 0)
-
-const setOrder = (data, type = null) => {
-  if (data.id in orders[data.market]) {
-    const order = orders[data.market][data.id]
-    order.data = data
-    order.waiting = false
+exports.setOrder = (data, orderCategory = null) => {
+  const market = data.market
+  const idx = orders[market].findIndex(order => order.id === data.id)
+  if (idx < 0) {
+    data.orderCategory = orderCategory
+    orders[market].push(data)
+    if (orders[market].length > maxOrderNumber) orders[market].shift()
   } else {
-    orders[data.market][data.id] = {
-      type: type,
-      data: data,
-      createdAt: moment().format('x'),
-      waiting: false,
-    }
+    data.orderCategory = orders[market][idx].orderCategory
+    orders[market][idx] = data
   }
-  if (data.status === 'closed') _closed(data.market)
 }
 
-const _closed = (market) => {
-  if (_shouldDeleteOrders(market)) _deleteOrders(market)
+exports.noOrder = market => {
+  if (orders[market].length <= 0) return true
+  return !(orders[market].find(order => order.status != 'closed'))
 }
 
-const _deleteOrders = (market) => {
-  const tmpOrders = {}
-  for (let key of Object.keys(orders[market])) {
-    const order = orders[market][key]
-    if (moment().diff(moment(order.createdAt, 'x')) < maxSaveMin * 60 * 1000) {
-      tmpOrders[key] = order
-    }
-  }
-  orders[market] = tmpOrders
+exports.getOrderCategory = (market, id) => {
+  const order = orders[market].find(order => order.id === id)
+  if (!order) return undefined
+  return order.orderCategory
 }
-
-const _shouldDeleteOrders = (market) => {
-  return _orderNumber(market) > maxOrderNumber
-}
-
-const _orderNumber = (market) => {
-  return Object.keys(orders[market]).length
-}
-
-const isOpeningOrder = (market) => {
-  if (_orderNumber(market) <= 0) return false
-  for (let key of Object.keys(orders[market])) {
-    if (orders[market][key].data.status != 'closed') return true
-  }
-  return false
-}
-
-const getOrderType = (market, id) => orders[market][id].type
-const setWaiting = (market, id) => (orders[market][id].waiting = true)
 
 exports.orders = orders
-exports.init = init
-exports.setOrder = setOrder
-exports.noOrder = noOrder
-exports.isOpeningOrder = isOpeningOrder
-exports.getOrderType = getOrderType
-exports.setWaiting = setWaiting

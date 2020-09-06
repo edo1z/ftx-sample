@@ -1,3 +1,7 @@
+exports.canCancelOrder = (market) => {
+
+}
+
 const shouldCancelOrders = (
   market,
   orderTimeLimit,

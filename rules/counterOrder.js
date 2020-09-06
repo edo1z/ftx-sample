@@ -1,10 +1,10 @@
 const conf = require('../config/index')
 const {lastPrice} = require('../data/tick')
-const {getOrderType} = require('../data/order')
+const {getOrderCategory} = require('../data/order')
 
 exports.canCounterOrder = (data) => {
-  const orderType = getOrderType(data.market, data.orderId)
-  if(orderType != 'order') return null
+  const orderCategory = getOrderCategory(data.market, data.orderId)
+  if(orderCategory != 'order') return null
   return _counterOrderInfo(data)
 }
 
