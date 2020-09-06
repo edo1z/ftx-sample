@@ -1,10 +1,25 @@
-const _shouldStopLoss = (market) => {
-  const nowPrice = tickData.latest(market).last
-  const profit = positionData.profit(market, nowPrice)
-  if (profit && profit.priceRange < 0) {
-    if (Math.abs(profit.priceRange) / nowPrice > maxLossRate) {
-      return true
+const conf = require('../config/index')
+const { calcProfit, posi } = require('../data/position')
+const {latest} = require('../data/tick')
+
+exports.canStopLoss = (market) => {
+  const profit = calcProfit(market)
+  const last = latest(market).last
+  if (profit.priceRange < 0) {
+    if(Math.abs(profit.priceRange) / last > conf.maxLossRate) {
+      return _orderInfo(market)
     }
   }
-  return false
+  return null
+}
+
+const _orderInfo = (market) => {
+  const position = posi(market)
+  return {
+    market: market,
+    side: position.side === 'buy'  ? 'sell' : 'buy',
+    price: null,
+    type: 'market',
+    size: position.size
+  }
 }

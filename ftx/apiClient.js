@@ -44,8 +44,8 @@ exports.cancelOrder = async (orderId) => {
   return await request('DELETE', path, null, true)
 }
 
-exports.cancelAllOrders = async () => {
-  return await request('DELETE', '/orders', null, true)
+exports.cancelAllOrders = async (options = {}) => {
+  return await request('DELETE', '/orders', options, true)
 }
 
 exports.getPositions = async () => {

@@ -39,7 +39,6 @@ test('data.order.getPastOrders', () => {
     moment().format(),
     moment().add(-5, 'seconds').format()
   ]
-  console.log(created[0], created[1], created[2])
   orders.test = [
     {id:1, status: 'new', orderCategory: 'order', createdAt: created[0]},
     {id:2, status: 'new', orderCategory: 'order', createdAt: created[1]},

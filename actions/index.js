@@ -3,12 +3,14 @@ const { canModifyCounterOrder } = require('../rules/counterOrder')
 const { order } = require('./order')
 const { modifyCounterOrders } = require('../actions/counterOrder')
 const { canCancelOrder } = require('../rules/cancel')
+const { canStopLoss } = require('../rules/stopLoss')
 const { cancelOrders } = require('./cancel')
-const { noPosi } = require('../data/position')
+const { noPosi, calcProfit } = require('../data/position')
 const { noOrder } = require('../data/order')
 const { isTickEmpty } = require('../data/tick')
+const {stopLoss} = require('./stopLoss')
 
-const timeInterval = 300
+const timeInterval = 500
 
 exports.init = (markets) => {
   markets.forEach((market) => _actionsLoop(market))
@@ -33,9 +35,10 @@ const __actionLoop = async (market) => {
   if (pastOrders) return await cancelOrders(pastOrders)
 
   // cancel counter order
-  const counterOrderInfo = canModifyCounterOrder(market)
-  if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
+  // const counterOrderInfo = canModifyCounterOrder(market)
+  // if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
 
-  // // StopLoss - stoploss rule && not stoping
-  // if (stopLossRule() && notStopping()) return await _stopLoss()
+  // stop loss
+  const stopLossOrderInfo = canStopLoss(market)
+  if (stopLossOrderInfo) return await stopLoss(market, stopLossOrderInfo)
 }

@@ -1,3 +1,4 @@
+const { latest } = require('../data/tick')
 const positions = {}
 
 exports.init = (markets) => {
@@ -10,9 +11,9 @@ exports.init = (markets) => {
 const _init = (market) =>
   (positions[market] = { side: null, size: 0, price: 0, profit: 0 })
 
-exports.isPosi = (market) => positions[market].size > 0
-exports.noPosi = (market) => positions[market].size <= 0
-exports.posi = (market) => positions[market]
+const isPosi = (market) => positions[market].size > 0
+const noPosi = (market) => positions[market].size <= 0
+const posi = (market) => positions[market]
 
 exports.setPosi = (data, orderCategory) => {
   switch (orderCategory) {
@@ -49,4 +50,21 @@ const _minusToPosition = (data) => {
   else position.size = size
 }
 
+exports.calcProfit = (market) => {
+  if (noPosi(market)) return 0
+  const position = posi(market)
+  const last = latest(market).last
+  const priceRange =
+    position.side === 'buy' ? last - position.price : position.price - last
+  const profit = priceRange * position.size
+  position.profit = profit
+  return {
+    priceRange: priceRange,
+    profit: profit,
+  }
+}
+
 exports.positions = positions
+exports.isPosi = isPosi
+exports.noPosi = noPosi
+exports.posi = posi

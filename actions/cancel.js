@@ -25,6 +25,39 @@ const _cancelOrder = async (orderId, token, tryCount = 1) => {
     console.log(`[cancel][order] Success! orderId: ${orderId} token: ${token}`)
   } catch (e) {
     err(e)
+    console.log(`[Cancel] Fail! SLEEP ${timeIntervalOfCancel} msec... orderId: ${orderId} token: ${token}`)
+    return new Promise(resolve => {
+      setTimeout(async () => {
+        const result = await _cancelOrder(orderId, token, ++tryCount)
+        resolve(result)
+      }, timeIntervalOfCancel)
+    })
+  }
+}
+
+exports.cancelAllOrders = async (orders) => {
+  const token = randomStr(15)
+  await Promise.all(orders.map(order => {
+    _cancelOrder(order.id, token)
+  }))
+}
+
+const maxTryCountOfCancel = 10
+const timeIntervalOfCancel = 3000
+
+const _cancelOrder = async (orderId, token, tryCount = 1) => {
+  if (tryCount > maxTryCountOfCancel) {
+    console.log(
+      `[Cancel] Exceeded maximum number of attempts for Cancel. orderId: ${orderId} token: ${token}`,
+    )
+    process.exit(1)
+  }
+  console.log(`[Cancel] try(${tryCount}). orderId: ${orderId} token: ${token}`)
+  try {
+    await ftx.cancelOrder(orderId)
+    console.log(`[cancel][order] Success! orderId: ${orderId} token: ${token}`)
+  } catch (e) {
+    err(e)
     console.log(`[Cancel] Fail! SLEEP ${timeIntervalOfCancel} msec... . orderId: ${orderId} token: ${token}`)
     return new Promise(resolve => {
       setTimeout(async () => {
