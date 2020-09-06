@@ -1,20 +1,21 @@
 const conf = require('../config/index')
-const { totalSize } = require('../data/tick')
+const { totalSize, latest } = require('../data/tick')
 
-exports.canOrder = (market, data) => {
-  const spreadRate = (data.ask - data.bid) / data.last
+exports.canOrder = (market) => {
+  const tick = latest(market)
+  const spreadRate = (tick.ask - tick.bid) / tick.last
   const size = totalSize(market)
-  const tradeAmountDiff = (size.bidSize - size.askSize) * data.last
+  const tradeAmountDiff = (size.bidSize - size.askSize) * tick.last
   if (
     tradeAmountDiff * -1 > conf.minTradeAmountDiff &&
     spreadRate < conf.maxSpreadRate
   ) {
-    return _orderInfo(market, data, 'ask')
+    return _orderInfo(market, tick, 'ask')
   } else if (
     tradeAmountDiff > conf.minTradeAmountDiff &&
     spreadRate < conf.maxSpreadRate
   ) {
-    return _orderInfo(market, data, 'bid')
+    return _orderInfo(market, tick, 'bid')
   }
   return null
 }

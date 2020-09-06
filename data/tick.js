@@ -5,6 +5,8 @@ const init = (markets) => {
   markets.forEach((market) => (ticks[market] = []))
 }
 
+exports.isTickEmpty = (market) => ticks[market].length === 0
+
 const setTick = (market, data) => {
   ticks[market].push(data)
   if (ticks[market].length > maxTickLength) ticks[market].shift()

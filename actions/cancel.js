@@ -4,10 +4,9 @@ const { randomStr } = require('../utils/randomStr')
 
 exports.cancelOrders = async (orders) => {
   const token = randomStr(15)
-  orders.forEach(async (order) => {
-    await _cancelOrder(order.id, token)
-    console.log(`[cancel][order] Success! orderId: ${order.id} token: ${token}`)
-  })
+  await Promise.all(orders.map(order => {
+    _cancelOrder(order.id, token)
+  }))
 }
 
 const maxTryCountOfCancel = 10
@@ -22,7 +21,8 @@ const _cancelOrder = async (orderId, token, tryCount = 1) => {
   }
   console.log(`[Cancel] try(${tryCount}). orderId: ${orderId} token: ${token}`)
   try {
-    return await ftx.cancelOrder(orderId)
+    await ftx.cancelOrder(orderId)
+    console.log(`[cancel][order] Success! orderId: ${orderId} token: ${token}`)
   } catch (e) {
     err(e)
     console.log(`[Cancel] Fail! SLEEP ${timeIntervalOfCancel} msec... . orderId: ${orderId} token: ${token}`)

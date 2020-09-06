@@ -1,18 +1,14 @@
-const ftx = require('./ftx/apiClient')
 const conf = require('./config/index')
 const Log = require('./logs/index')
 const { connect } = require('./ftx/webSocketClient')
-const { init: initStatus, statuses } = require('./statuses')
-const { init: initOrder, setOrder, noOrder } = require('./data/order')
-const { init: initPosi, noPosi } = require('./data/position')
+const { init: initStatus } = require('./statuses')
+const { init: initActions } = require('./actions/index')
+const { init: initOrder, setOrder } = require('./data/order')
+const { init: initPosi } = require('./data/position')
 const { init: initTick, setTick } = require('./data/tick')
 const { init: initFill, setFill } = require('./data/fill')
-const { canOrder } = require('./rules/order')
-const {canCounterOrder, canModifyCounterOrder} = require('./rules/counterOrder')
-const { order } = require('./actions/order')
-const { counterOrder, modifyCounterOrders } = require('./actions/counterOrder')
-const { canCancelOrder} = require('./rules/cancel')
-const {cancelOrders} = require('./actions/cancel')
+const { canCounterOrder } = require('./rules/counterOrder')
+const { counterOrder } = require('./actions/counterOrder')
 
 const main = async () => {
   _init()
@@ -25,6 +21,7 @@ const _init = () => {
   initFill(conf.markets)
   initPosi(conf.markets)
   initTick(conf.markets)
+  initActions(conf.markets)
 }
 
 const _subscribe = () => {
@@ -50,7 +47,6 @@ const _onMessage = async (data) => {
 
 const _onTick = async (data) => {
   setTick(data.market, data.data)
-  await _actionsOnTick(data.market, data.data)
 }
 
 const _onOrder = (data) => {
@@ -63,34 +59,6 @@ const _onFill = async (data) => {
   setFill(data.data)
   Log.position.now(data.data.market)
   _actionsOnFill(data.data)
-}
-
-const _actionsOnTick = async (market, data) => {
-  if (statuses[market].onTick.wait) return
-  statuses[market].onTick.wait = true
-  await __actionsOnTick(market, data)
-  statuses[market].onTick.wait = false
-}
-
-const __actionsOnTick = async (market, data) => {
-  // order
-  if (noPosi(market) && noOrder(market)) {
-    const orderInfo = canOrder(market, data)
-    if (orderInfo) return await order(orderInfo)
-  }
-
-  // cancel order
-  const pastOrders = canCancelOrder(market)
-  console.log('cancel order ==> ', pastOrders)
-  if (pastOrders) return await cancelOrders(pastOrders)
-
-  // cancel counter order
-  const counterOrderInfo = canModifyCounterOrder(market)
-  console.log('cancel counter order ==> ', counterOrderInfo)
-  if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
-
-  // // StopLoss - stoploss rule && not stoping
-  // if (stopLossRule() && notStopping()) return await _stopLoss()
 }
 
 const _actionsOnFill = async (data) => {
