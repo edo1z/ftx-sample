@@ -1,12 +1,16 @@
 const ftx = require('./ftx/apiClient')
 const conf = require('./config/index')
-const {init:initStatus, statuses} = require('./statuses')
+const Log = require('./logs/index')
+const { init: initStatus, statuses } = require('./statuses')
 const { connect } = require('./ftx/webSocketClient')
 const { init: initOrder, setOrder, noOrder } = require('./data/order')
-const { init: initPosi, setPosiFromFill, noPosi } = require('./data/position')
+const { init: initPosi, noPosi } = require('./data/position')
 const { init: initTick, setTick } = require('./data/tick')
-const {canOrder} = require('./rules/order')
-const {order} = require('./actions/order')
+const { init: initFill, setFill } = require('./data/fill')
+const { canOrder } = require('./rules/order')
+const {canCounterOrder} = require('./rules/counterOrder')
+const { order } = require('./actions/order')
+const { counterOrder } = require('./actions/counterOrder')
 
 const main = async () => {
   _init()
@@ -16,6 +20,7 @@ const main = async () => {
 const _init = () => {
   initStatus(conf.markets)
   initOrder(conf.markets)
+  initFill(conf.markets)
   initPosi(conf.markets)
   initTick(conf.markets)
 }
@@ -38,7 +43,7 @@ const _onMessage = async (data) => {
   if (data.type !== 'update') return console.log(data)
   if (data.channel === 'ticker') _onTick(data)
   else if (data.channel === 'orders') _onOrder(data)
-  else if (data.channel === 'fills')  _onFill(data)
+  else if (data.channel === 'fills') _onFill(data)
 }
 
 const _onTick = async (data) => {
@@ -51,8 +56,9 @@ const _onOrder = (data) => {
 }
 
 const _onFill = async (data) => {
-  setPosiFromFill(data.data)
-  _actionsOnFill(data.market, data.data)
+  setFill(data.data)
+  Log.fill.fill(data.data)
+  _actionsOnFill(data.data)
 }
 
 const _actionsOnTick = async (market, data) => {
@@ -60,23 +66,6 @@ const _actionsOnTick = async (market, data) => {
   statuses[market].onTick.wait = true
   await __actionsOnTick(market, data)
   statuses[market].onTick.wait = false
-}
-
-const _actionsOnFill = async (market, data) => {
-  if (statuses[market].onFill.wait) return
-  statuses[market].onFill.wait = true
-  await __actionsOnFill(market, data)
-  statuses[market].onFill.wait = false
-}
-
-const orderRule = () => {
-  return false
-}
-
-const _order = () => {
-  console.log('order!')
-  process.exit(0)
-  newPromise((resolve) => setTimeout(resolve, 500))
 }
 
 const __actionsOnTick = async (market, data) => {
@@ -98,8 +87,10 @@ const __actionsOnTick = async (market, data) => {
   // if (stopLossRule() && notStopping()) return await _stopLoss()
 }
 
-const __actionsOnFill = async (market, data) => {
-  if (canCounterOrder()) counterOrder()
+const _actionsOnFill = async (data) => {
+  const orderInfo = canCounterOrder(data)
+  if (!orderInfo) return
+  counterOrder(orderInfo)
 }
 
 main()

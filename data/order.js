@@ -8,14 +8,7 @@ const orders = {}
 const init = (markets) => {
   markets.forEach((market) => {
     orders[market] = {}
-    // getOpenOrders(market)
   })
-}
-
-const getOpenOrders = async (market) => {
-  const res = await ftx.getOpenOrders(market).catch(ftx.err)
-  orders[market] = res.data.result
-  setTimeout(getOpenOrders, 1000)
 }
 
 const noOrder = market => (_orderNumber(market) <= 0)
@@ -72,7 +65,6 @@ const setWaiting = (market, id) => (orders[market][id].waiting = true)
 
 exports.orders = orders
 exports.init = init
-exports.getOpenOrders = getOpenOrders
 exports.setOrder = setOrder
 exports.noOrder = noOrder
 exports.isOpeningOrder = isOpeningOrder

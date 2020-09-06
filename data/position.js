@@ -1,5 +1,4 @@
 const ftx = require('../ftx/apiClient')
-const orderData = require('./order')
 
 const positions = {}
 
@@ -8,32 +7,26 @@ const init = (markets) => {
     (market) =>
       (positions[market] = { side: null, size: 0, price: 0, profit: 0 }),
   )
-  // getPositions()
 }
-
-const getPositions = async () => {
-  const res = await ftx.getPositions().catch(ftx.err)
-  console.log(res.data)
-  res.data.result.forEach(posi => positions[posi.future] = posi)
-  setTimeout(getPositions, 1000)
-}
-
-const isPosi = (market) => positions[market].size > 0
-const noPosi = (market) => positions[market].size <= 0
 
 const _init = (market) =>
   (positions[market] = { side: null, size: 0, price: 0, profit: 0 })
 
-exports.setPosiFromFill = (data) => {
-  _displayFill(data)
-  const orderType = orderData.orders[data.market][data.orderId].type
-  if (orderType === 'order') {
-    _addToPosition(data)
-  } else if (orderType === 'counterOrder') {
-    _displayProfit(data)
-    _minusToPosition(data)
-  } else {
-    console.log('orderType is not set.')
+const isPosi = (market) => positions[market].size > 0
+const noPosi = (market) => positions[market].size <= 0
+
+exports.setPosi = (data, orderType) => {
+  switch (orderType) {
+    case 'order':
+      _addToPosition(data)
+      break
+    case 'counterOrder':
+      _displayProfit(data)
+      _minusToPosition(data)
+      break
+    default:
+      console.log('orderType is not set.')
+      process.exit(1)
   }
 }
 
@@ -58,7 +51,6 @@ const _minusToPosition = (data) => {
   else position.size = size
 }
 
-exports.getPositions = getPositions
 exports.positions = positions
 exports.isPosi = isPosi
 exports.noPosi = noPosi

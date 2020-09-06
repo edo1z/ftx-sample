@@ -56,11 +56,3 @@ exports.getFilss = async (market) => {
   const data = {market: market}
   return await request('GET', '/fills', data, true)
 }
-
-_err = (err, exit) => {
-  const res = err.response
-  console.log(`[${res.status} - ${res.statusText}] ${res.data.error} - ${res.config.url}`)
-  if (exit) process.exit(1)
-}
-exports.err = (err) => _err(err, false)
-exports.errExit = (err) => _err(err, true)

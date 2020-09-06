@@ -1,38 +1,19 @@
 const ftx = require('../ftx/apiClient')
+const {err} = require('../error/error')
 const {setOrder} = require('../data/order')
 const {sleep} = require('../utils/sleep')
 
 exports.order = async (orderInfo) => {
   console.log('[order] Start')
   try {
-    const result = await ftx.order(orderInfo).catch()
+    const result = await ftx.order(orderInfo)
     setOrder(result.data.result, 'order')
     console.log('[order] Fin')
   } catch(e) {
-    ftx.err(e)
+    err(e)
     console.log('[order] Fail! SLEEP 1000 msec...')
     await sleep(1000)
   }
-}
-
-const _counterOrderInfo = (data) => {
-  const side = data.side === 'buy' ? 'sell' : 'buy'
-  const targetProfit = tickData.lastPrice(data.market) * minProfitRate
-  const price =
-    side === 'buy' ? data.price - targetProfit : data.price + targetProfit
-  return {
-    side: side,
-    market: data.market,
-    price: price,
-    size: data.size,
-  }
-}
-
-const _counterOrder = async (orderInfo) => {
-  console.log('counterOrder')
-  const result = await ftx.order(orderInfo).catch(ftx.errorExit)
-  console.log('counterOrder FIN')
-  orderData.setOrder(result.data.result, 'counterOrder')
 }
 
 const _modifyOrders = async (market, orderIds) => {
