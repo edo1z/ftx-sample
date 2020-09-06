@@ -25,7 +25,6 @@ exports.setPosi = (data, orderCategory) => {
       break
     default:
       console.log('orderCategory is not set.')
-      process.exit(1)
   }
 }
 
