@@ -1,5 +1,9 @@
 const request = require('./apiRequest')
 
+exports.getMarkets = async () => {
+  return await request('GET', '/markets', null, false)
+}
+
 exports.getAllSubAccounts = async () => {
   return await request('GET', '/subaccounts', null, true)
 }
