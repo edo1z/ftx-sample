@@ -1,14 +1,14 @@
 const { canOrder } = require('../rules/order')
-const { canModifyCounterOrder } = require('../rules/counterOrder')
 const { order } = require('./order')
-const { modifyCounterOrders } = require('../actions/counterOrder')
 const { canCancelOrder } = require('../rules/cancel')
 const { canStopLoss } = require('../rules/stopLoss')
 const { cancelOrders } = require('./cancel')
-const { noPosi, calcProfit } = require('../data/position')
+const { noPosi } = require('../data/position')
 const { noOrder } = require('../data/order')
 const { isTickEmpty } = require('../data/tick')
-const {stopLoss} = require('./stopLoss')
+const { stopLoss } = require('./stopLoss')
+const { canModifyCounterOrder } = require('../rules/counterOrder')
+const { modifyCounterOrders } = require('../actions/counterOrder')
 
 const timeInterval = 500
 

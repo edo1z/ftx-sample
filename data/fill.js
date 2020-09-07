@@ -13,7 +13,7 @@ exports.setFill = (data) => {
   data.orderCategory = getOrderCategory(market, data.orderId)
   fills[market].push(data)
   if (fills[market].length > maxFillLength) fills[market].shift()
-  setPosi(data, data.orderCategory)
+  // setPosi(data, data.orderCategory)
 }
 
 exports.fills = fills

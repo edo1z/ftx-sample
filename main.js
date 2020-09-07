@@ -21,6 +21,7 @@ const _init = () => {
   initFill(conf.markets)
   initPosi(conf.markets)
   initTick(conf.markets)
+  initData(conf.markets)
   initActions(conf.markets)
 }
 
