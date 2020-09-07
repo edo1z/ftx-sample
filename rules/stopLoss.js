@@ -1,13 +1,12 @@
 const conf = require('../config/index')
 const { calcProfit, posi } = require('../data/position')
-const {latest} = require('../data/tick')
 
 exports.canStopLoss = (market) => {
   const profit = calcProfit(market)
-  const last = latest(market).last
   if (profit.priceRange < 0) {
-    if(Math.abs(profit.priceRange) / last > conf.maxLossRate) {
-      console.log('you can stop loss...', Math.abs(profit.priceRange), last, Math.abs(profit.priceRange) / last, Math.abs(profit.priceRange) / last > conf.maxLossRate)
+    const lossRate = Math.abs(profit.priceRange) / conf.amountPerTransaction
+    if(lossRate > conf.maxLossRate) {
+      console.log('stop loss... lossRate:', lossRate.toFixed(4), ' priceRange: ', profit.priceRange.toFixed(4), ' profit: ', profit.profit.toFixed(4))
       return _orderInfo(market)
     }
   }

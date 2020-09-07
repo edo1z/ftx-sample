@@ -35,8 +35,8 @@ const __actionLoop = async (market) => {
   if (pastOrders) return await cancelOrders(pastOrders)
 
   // cancel counter order
-  // const counterOrderInfo = canModifyCounterOrder(market)
-  // if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
+  const counterOrderInfo = canModifyCounterOrder(market)
+  if (counterOrderInfo) return await modifyCounterOrders(counterOrderInfo)
 
   // stop loss
   const stopLossOrderInfo = canStopLoss(market)

@@ -1,7 +1,7 @@
 const ftx = require('../ftx/apiClient')
 const err = require('../error/error')
 const { setPosiFromApi } = require('./position')
-const { setOrdersFromApi } = require('./orders')
+// const { setOrdersFromApi } = require('./orders')
 
 const timeInterval = 1000
 
@@ -16,7 +16,7 @@ const _dataLoop = async (market) => {
 
 const __dataLoop = async (market) => {
   const positions = await ftx.getPositions().catch(err)
-  setPosiFromApi(positions)
+  setPosiFromApi(positions.data.result)
   // const orders = await ftx.getOpenOrders().catch(err)
   // setOrdersFromApi(orders)
   // fill

@@ -11,9 +11,21 @@ exports.canCounterOrder = (data) => {
 const _counterOrderInfo = (data) => {
   const market = data.market
   const side = data.side === 'buy' ? 'sell' : 'buy'
-  let targetProfit = latest(market).last * conf.minProfitRate
-  if (side === 'buy') targetProfit *= -1
-  const price = data.price + targetProfit
+  let targetProfit = conf.amountPerTransaction * conf.minProfitRate
+
+  // TODO Fix  (for ETH only)
+  targetProfit = Math.round(targetProfit * 100) / 100
+  console.log(targetProfit)
+  if (targetProfit <= 0) targetProfit = 0.01
+  console.log('targetp', targetProfit)
+
+  let price
+  if (side === 'buy') {
+    price = data.price - targetProfit
+  } else {
+    price = data.price + targetProfit
+  }
+  console.log('counterOrderInfo: side:', side, ' fillPricel:', data.price, ' price:', price, ' size:', data.size)
   return {
     side: side,
     market: market,
