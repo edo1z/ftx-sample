@@ -1,10 +1,10 @@
 # FTX-sample
 
-FTX-sample is the Automatic trading program for [FTX](https://ftx.com/#a=4882301)
+FTX-sample is the Automatic trading program for [FTX](https://ftx.com/#a=4882303)
 
 ## How to use
-- Register your account on [FTX](https://ftx.com/#a=4882301).
-- Create an [FTX](https://ftx.com/#a=4882301) API key and set it in the .env file.
+- Register your account on [FTX](https://ftx.com/#a=4882303).
+- Create an [FTX](https://ftx.com/#a=4882303) API key and set it in the .env file.
 - Install and start this program.
 
 ## API Key
