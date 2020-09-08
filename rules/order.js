@@ -1,5 +1,6 @@
 const conf = require('../config/index')
 const { totalSize, latest } = require('../data/tick')
+const { specifiedSize } = require('../data/order')
 
 exports.canOrder = (market) => {
   const tick = latest(market)
@@ -22,8 +23,7 @@ exports.canOrder = (market) => {
 
 const _orderInfo = (market, data, side) => {
   const price = side === 'ask' ? data.ask : data.bid
-  const size =
-    Math.round((conf.amountPerTransaction / price) * 1000000) / 1000000
+  const size = specifiedSize(market, side)
   return {
     side: side === 'ask' ? 'sell' : 'buy',
     market: market,

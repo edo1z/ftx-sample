@@ -1,5 +1,7 @@
-const { noOrder, getOrderCategory, orders, getPastOrders } = require('../../data/order')
-const { order } = require('../../ftx/apiClient')
+const { noOrder, getOrderCategory, orders, getPastOrders, specifiedSize } = require('../../data/order')
+const {ticks} = require('../../data/tick')
+const conf = require('../../config/index')
+const {markets} = require('../../data/market')
 const moment = require('moment')
 
 test('data.order.noOrder', () => {
@@ -47,4 +49,18 @@ test('data.order.getPastOrders', () => {
   expect(getPastOrders('test', 10000, 'order')).toStrictEqual([
     {id:1, status: 'new', orderCategory: 'order', createdAt: created[0]}
   ])
+})
+
+test('data.order.specifiedSize', () => {
+  const market = 'test'
+  ticks[market] = [{bid: 350, ask: 360}]
+  let side = 'buy'
+  conf.amountPerTransaction = 1
+  markets[market] = {
+    priceIncrement: 0.01,
+    sizeIncrement: 0.001
+  }
+  expect(specifiedSize(market, side)).toBe(0.002857)
+  side = 'sell'
+  expect(specifiedSize(market, side)).toBe(0.002778)
 })

@@ -34,14 +34,22 @@ exports.setPosiFromApi = (data, markets) => {
   })
 }
 
-exports.calcProfit = (market) => {
+exports.calcProfit = (market, side = null) => {
   if (noPosi(market)) return null
   const position = posi(market)
-  const last = latest(market).last
+  const tick = latest(market)
+  let nowPrice
+  if (side === 'buy') {
+    nowPrice = tick.bid
+  } else if (side === 'sell') {
+    nowPrice = tick.ask
+  } else {
+    nowPrice = tick.last
+  }
   const priceRange =
     position.side === 'buy'
-      ? last - position.entryPrice
-      : position.entryPrice - last
+      ? nowPrice - position.entryPrice
+      : position.entryPrice - nowPrice
   const profit = priceRange * position.size
   position.profit = profit
   const profitRate = profit / conf.amountPerTransaction

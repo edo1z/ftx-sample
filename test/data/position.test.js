@@ -12,13 +12,13 @@ test('data.position.init', () => {
 
 test('data.position.calcProfit', () => {
   const market = 'test'
-  positions[market] = { side: 'buy', size: 0.1, entryPrice: 100, profit: 0 }
-  ticks[market] = [{last: 50}]
-  conf.amountPerTransaction = 100
-  expect(calcProfit(market)).toStrictEqual({
-    priceRange: -50,
-    profit: -5,
-    profitRate: -0.5
+  positions[market] = { side: 'buy', size: 0.002, entryPrice: 330, profit: 0 }
+  ticks[market] = [{last: 350, bid: 340, ask: 360}]
+  conf.amountPerTransaction = 1
+  expect(calcProfit(market, 'buy')).toStrictEqual({
+    priceRange: 10,
+    profit: 0.02,
+    profitRate: 0.02
   })
-  expect(posi(market).profit).toBe(-5)
+  expect(posi(market).profit).toBe(0.02)
 })

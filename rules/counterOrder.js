@@ -1,6 +1,6 @@
 const conf = require('../config/index')
 const { latest } = require('../data/tick')
-const { getOrderCategory, getPastOrders, getAllByOrderCategory } = require('../data/order')
+const { getOrderCategory, getPastOrders, getAllByOrderCategory, specifiedSize } = require('../data/order')
 const { sizeIncrement, priceIncrement } = require('../data/market')
 const { calcProfit } = require('../data/position')
 
@@ -17,7 +17,7 @@ exports.canCounterOrder = (data) => {
 const _counterOrderInfo = (fillData) => {
   const market = fillData.market
   const side = fillData.side === 'buy' ? 'sell' : 'buy'
-  let targetProfit = conf.amountPerTransaction * conf.minProfitRate
+  let targetProfit = conf.amountPerTransaction * conf.minProfitRate / specifiedSize(market, side)
   if (targetProfit < priceIncrement(market)) {
     targetProfit = priceIncrement(market)
   }

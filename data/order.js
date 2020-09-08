@@ -1,4 +1,7 @@
 const moment = require('moment')
+const conf = require('../config/index')
+const { latest } = require('../data/tick')
+const {sizeIncrement} = require('./market.js')
 const maxOrderNumber = 50
 const orders = {}
 
@@ -45,6 +48,19 @@ exports.getPastOrders = (market, msec, orderCategory = 'order') => {
     if (order.orderCategory != orderCategory) return false
     return moment().diff(moment(order.createdAt)) > msec
   })
+}
+
+// 規定の1取引当たりのサイズ
+exports.specifiedSize = (market, side) => {
+  const tick = latest(market)
+  const nowPrice = side === 'buy' ? tick.bid : tick.ask
+  const size =
+    Math.round((conf.amountPerTransaction / nowPrice) * 1000000) / 1000000
+  if (sizeIncrement(market) > size) {
+    console.log('order size is too small.')
+    process.exit(1)
+  }
+  return size
 }
 
 exports.orders = orders
