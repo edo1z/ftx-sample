@@ -24,7 +24,7 @@ const _cancelOrder = async (orderId, token, tryCount = 1) => {
     await ftx.cancelOrder(orderId)
     console.log(`[cancel][order] Success! orderId: ${orderId} token: ${token}`)
   } catch (e) {
-    err(e)
+    if(err(e) === 'Order already closed') resolve()
     console.log(`[Cancel] Fail! SLEEP ${timeIntervalOfCancel} msec... orderId: ${orderId} token: ${token}`)
     return new Promise(resolve => {
       setTimeout(async () => {

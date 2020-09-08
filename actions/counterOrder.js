@@ -20,7 +20,7 @@ const _counterOrder = async (orderInfo, token, tryCount = 1) => {
     )
     process.exit(1)
   }
-  console.log(`[counterOrder] try(${tryCount}) ` + token)
+  console.log(`[counterOrder] try(${tryCount}) side:`, orderInfo.side, ' price:', orderInfo.price, ' size:', orderInfo.size,  token)
   try {
     return await ftx.order(orderInfo)
   } catch (e) {
@@ -38,9 +38,11 @@ const _counterOrder = async (orderInfo, token, tryCount = 1) => {
 exports.modifyCounterOrders = async (orderInfo) => {
   const token = randomStr(15)
   orderInfo.forEach(async (data) => {
-    await _modifyCounterOrder(data, token)
+    const result = await _modifyCounterOrder(data, token)
+    const order = result.data.result
+    setOrder(order, 'counterOrder')
     console.log(
-      `[Modify][counterOrder] Success! orderId: ${orderInfo.id} token: ${token}`,
+      `[Modify][counterOrder] Success! new orderId: ${order.id} token: ${token}`,
     )
   })
 }
@@ -51,12 +53,12 @@ const timeIntervalOfModifyCounterOrder = 3000
 const _modifyCounterOrder = async (data, token, tryCount = 1) => {
   if (tryCount > maxTryCountOfModifyCounterOrder) {
     console.log(
-      `[Modify][countOrder] Exceeded maximum number of attempts for Cancel. orderId: ${data.Id} token: ${token}`,
+      `[Modify][countOrder] Exceeded maximum number of attempts for Cancel. orderId: ${data.id} token: ${token}`,
     )
     process.exit(1)
   }
   console.log(
-    `[Modify][countOrder] try(${tryCount}). orderId: ${data.id} token: ${token}`,
+    `[Modify][countOrder] try(${tryCount}). side:`, ' price:', data.data.price, `orderId: ${data.id} token: ${token}`,
   )
   try {
     return await ftx.modifyOrder(data.id, data.data)

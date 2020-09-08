@@ -1,7 +1,7 @@
 const conf = require('./config/index')
 const Log = require('./logs/index')
 const { connect } = require('./ftx/webSocketClient')
-const { init: initStatus } = require('./statuses')
+const { init: initStatus } = require('./data/statuses')
 const { init: initActions } = require('./actions/index')
 const { init: initData } = require('./data/index')
 const { init: initOrder, setOrder } = require('./data/order')
@@ -57,9 +57,7 @@ const _onOrder = (data) => {
 
 const _onFill = async (data) => {
   Log.fill.fill(data.data)
-  Log.profit.fill(data.data)
   setFill(data.data)
-  Log.position.now(data.data.market)
   _actionsOnFill(data.data)
 }
 

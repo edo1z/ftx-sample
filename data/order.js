@@ -24,8 +24,17 @@ exports.noOrder = (market) => {
   return !orders[market].find((order) => order.status != 'closed')
 }
 
+const getById = (market, id) => {
+  return orders[market].find((order) => order.id === id)
+}
+exports.getById = getById
+
+exports.getAllByOrderCategory = (market, orderCateogry) => {
+  orders[market].filter((order) => order.orderCategory === orderCateogry)
+}
+
 exports.getOrderCategory = (market, id) => {
-  const order = orders[market].find((order) => order.id === id)
+  const order = getById(market, id)
   if (!order) return undefined
   return order.orderCategory
 }

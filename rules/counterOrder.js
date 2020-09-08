@@ -1,40 +1,56 @@
 const conf = require('../config/index')
 const { latest } = require('../data/tick')
-const { getOrderCategory, getPastOrders } = require('../data/order')
+const { getOrderCategory, getPastOrders, getAllByOrderCategory } = require('../data/order')
+const { sizeIncrement, priceIncrement } = require('../data/market')
+const { calcProfit } = require('../data/position')
 
 exports.canCounterOrder = (data) => {
   const orderCategory = getOrderCategory(data.market, data.orderId)
   if (orderCategory != 'order') return null
+  if (data.size < sizeIncrement(data.market)) {
+    console.log('you can counterOrder. but, size it too small.', data.size, sizeIncrement(data.market))
+    return null
+  }
   return _counterOrderInfo(data)
 }
 
-const _counterOrderInfo = (data) => {
-  const market = data.market
-  const side = data.side === 'buy' ? 'sell' : 'buy'
+const _counterOrderInfo = (fillData) => {
+  const market = fillData.market
+  const side = fillData.side === 'buy' ? 'sell' : 'buy'
   let targetProfit = conf.amountPerTransaction * conf.minProfitRate
-
-  // TODO Fix  (for ETH only)
-  targetProfit = Math.round(targetProfit * 100) / 100
-  console.log(targetProfit)
-  if (targetProfit <= 0) targetProfit = 0.01
-  console.log('targetp', targetProfit)
-
+  if (targetProfit < priceIncrement(market)) {
+    targetProfit = priceIncrement(market)
+  }
   let price
   if (side === 'buy') {
-    price = data.price - targetProfit
+    price = fillData.price - targetProfit
+    const bidPrice = latest(market).bid
+    if (bidPrice < price) price = bidPrice
   } else {
-    price = data.price + targetProfit
+    price = fillData.price + targetProfit
+    const askPrice = latest(market).ask
+    if (askPrice > price) price = askPrice
   }
-  console.log('counterOrderInfo: side:', side, ' fillPricel:', data.price, ' price:', price, ' size:', data.size)
+  console.log('counterOrderInfo: side:', side, ' fillPricel:', fillData.price, ' price:', price, ' size:', fillData.size)
   return {
     side: side,
     market: market,
     price: price,
-    size: data.size,
+    size: fillData.size,
   }
 }
 
 exports.canModifyCounterOrder = (market) => {
+  const profit = calcProfit(market)
+  if (!profit) return null
+  if (profit.profitRate >= -1 * conf.maxLossRateOfModifyOrder) {
+    return _canModifyCounterOrderWithTimeOver(market)
+  } else {
+    return _canModifyCounterOrderWithLossRate(market)
+  }
+}
+
+const _canModifyCounterOrderWithTimeOver = (market) => {
   const timeLimit = conf.counterOrderTimeLimit
   const pastCounterOrders = getPastOrders(
     market,
@@ -44,6 +60,17 @@ exports.canModifyCounterOrder = (market) => {
   if (!pastCounterOrders || pastCounterOrders.length === 0) return null
   const orderInfo = []
   pastCounterOrders.forEach((order) => {
+    const _orderInfo = _modifyCounterOrderIndo(market, order)
+    if (_orderInfo) orderInfo.push(_orderInfo)
+  })
+  return orderInfo
+}
+
+const _canModifyCounterOrderWithLossRate = (market) => {
+  const orders = getAllByOrderCategory(market, 'counterOrder')
+  if (!orders || orders.length === 0) return null
+  const orderInfo = []
+  orders.forEach((order) => {
     const _orderInfo = _modifyCounterOrderIndo(market, order)
     if (_orderInfo) orderInfo.push(_orderInfo)
   })

@@ -2,14 +2,16 @@ const statuses = {}
 
 const init = (markets) => {
   markets.forEach((market) => (statuses[market] = {
-    onTick: {wait: false},
-    onOrder: {wait: false},
-    onFill: {wait: false},
     order: { wait: false },
-    counterOrder: {wait: false},
+    modifyOrder: {wait: false},
     cancel: {wait: false},
     stopLoss: {wait: false}
   }))
+}
+
+exports.isWaiting = (market, name) => statuses[market][name].wait
+exports.setWait = (market, name, value) => {
+  statuses[market][name].wait = value
 }
 
 exports.statuses = statuses

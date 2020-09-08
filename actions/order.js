@@ -4,7 +4,7 @@ const {setOrder} = require('../data/order')
 const {sleep} = require('../utils/sleep')
 
 exports.order = async (orderInfo) => {
-  console.log('[order] Start')
+  console.log('[order] Start side:', orderInfo.side, ' price:', orderInfo.price, ' size:', orderInfo.size)
   try {
     const result = await ftx.order(orderInfo)
     setOrder(result.data.result, 'order')
