@@ -55,3 +55,6 @@ module.exports = {
 - `orderTimeLimit` is the valid order time (seconds)
 - `counterOrderTimeLimit` is the valid time for counter orders. When the valid time expires, reset the current price.
 - `markets` is a list of markets for automatic trading
+
+## License
+MIT
