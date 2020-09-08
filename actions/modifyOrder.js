@@ -7,12 +7,14 @@ exports.modifyCounterOrders = async (orderInfo) => {
   const token = randomStr(15)
   orderInfo.forEach(async (data) => {
     const result = await _modifyCounterOrder(data, token)
-    const order = result.data.result
     closeById(data.market, data.id)
-    setOrder(order, 'counterOrder')
-    console.log(
-      `[Modify][counterOrder] Success! new orderId: ${order.id} token: ${token}`,
-    )
+    if (result) {
+      const order = result.data.result
+      setOrder(order, 'counterOrder')
+      console.log(
+        `[Modify][counterOrder] Success! new orderId: ${order.id} token: ${token}`,
+      )
+    }
   })
 }
 
@@ -27,12 +29,21 @@ const _modifyCounterOrder = async (data, token, tryCount = 1) => {
     process.exit(1)
   }
   console.log(
-    `[Modify][countOrder] try(${tryCount}). side:`, ' price:', data.data.price, `orderId: ${data.id} token: ${token}`,
+    `[Modify][countOrder] try(${tryCount}).`,
+    ' price:',
+    data.data.price,
+    `orderId: ${data.id} token: ${token}`,
   )
   try {
     return await ftx.modifyOrder(data.id, data.data)
   } catch (e) {
-    err(e)
+    const errorMessage = err(e)
+    if (
+      errorMessage === 'Size too small for provide' ||
+      errorMessage === 'Order already closed'
+    ) {
+      return null
+    }
     console.log(
       `[Modify][counterOrder] Fail! SLEEP ${timeIntervalOfModifyCounterOrder} msec... . orderId: ${data.id} token: ${token}`,
     )

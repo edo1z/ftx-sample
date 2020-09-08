@@ -11,6 +11,7 @@ const { canModifyCounterOrder } = require('../rules/modifyOrder')
 const { modifyCounterOrders } = require('../actions/modifyOrder')
 const { isWaiting, setWait } = require('../data/statuses')
 const { sleep } = require('../utils/sleep')
+const { randomStr } = require('../utils/randomStr')
 
 const timeInterval = 500
 
@@ -56,21 +57,31 @@ const __actionLoop = async (market) => {
   if (!isWaiting(market, 'stopLoss') && !isWaiting(market, 'modifyOrder')) {
     const stopLossOrderInfo = canStopLoss(market)
     if (stopLossOrderInfo) {
+      const token = randomStr(15)
+      console.log('[StopLoss] Start.', token)
       setWait(market, 'stopLoss', true)
       await stopLoss(market, stopLossOrderInfo)
-      await sleep(3000)
+      await sleep(10000)
+      console.log('[StopLoss] FIN.', token)
       return setWait(market, 'stopLoss', false)
     }
+  } else {
+    console.log('waiting stoploss or modifyorder', isWaiting(market, 'modifyOrder'), isWaiting(market, 'stopLoss'))
   }
 
   // modify counter order
   if (!isWaiting(market, 'modifyOrder') && !isWaiting(market, 'stopLoss')) {
     const counterOrderInfo = canModifyCounterOrder(market)
     if (counterOrderInfo && counterOrderInfo.length) {
+      const token = randomStr(15)
+      console.log('[ModifyOrder] Start.', token)
       setWait(market, 'modifyOrder', true)
       await modifyCounterOrders(counterOrderInfo)
-      await sleep(2000)
+      await sleep(3000)
+      console.log('[ModifyOrder] FIN.', token)
       return setWait(market, 'modifyOrder', false)
     }
+  } else {
+    console.log('waiting modifyorder or stoploss', isWaiting(market, 'modifyOrder'), isWaiting(market, 'stopLoss'))
   }
 }

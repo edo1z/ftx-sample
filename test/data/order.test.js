@@ -76,7 +76,6 @@ test('data.order.getAllByOrderCategory', () =>  {
   const result = getAllByOrderCategory(market, 'counterOrder')
   expect(result).toStrictEqual([
     { id: 2, orderCategory: 'counterOrder', status: 'new' },
-    { id: 4, orderCategory: 'counterOrder', status: 'closed' },
   ])
   const result2 = getAllByOrderCategory(market, 'order')
   expect(result2).toStrictEqual([

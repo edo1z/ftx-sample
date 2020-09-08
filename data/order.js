@@ -1,7 +1,7 @@
 const moment = require('moment')
 const conf = require('../config/index')
 const { latest } = require('../data/tick')
-const {sizeIncrement} = require('./market.js')
+const { sizeIncrement } = require('./market.js')
 const maxOrderNumber = 50
 const orders = {}
 
@@ -39,7 +39,10 @@ const getById = (market, id) => {
 exports.getById = getById
 
 exports.getAllByOrderCategory = (market, orderCateogry) => {
-  return orders[market].filter((order) => order.orderCategory === orderCateogry)
+  return orders[market].filter(
+    (order) =>
+      order.orderCategory === orderCateogry && order.status != 'closed',
+  )
 }
 
 exports.getOrderCategory = (market, id) => {
