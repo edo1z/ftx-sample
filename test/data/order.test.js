@@ -1,4 +1,4 @@
-const { noOrder, getOrderCategory, orders, getPastOrders, specifiedSize } = require('../../data/order')
+const { noOrder, getOrderCategory, orders, getPastOrders, specifiedSize, getAllByOrderCategory } = require('../../data/order')
 const {ticks} = require('../../data/tick')
 const conf = require('../../config/index')
 const {markets} = require('../../data/market')
@@ -63,4 +63,23 @@ test('data.order.specifiedSize', () => {
   expect(specifiedSize(market, side)).toBe(0.002857)
   side = 'sell'
   expect(specifiedSize(market, side)).toBe(0.002778)
+})
+
+test('data.order.getAllByOrderCategory', () =>  {
+  const market = 'test'
+  orders.test = [
+    { id: 1, orderCategory: 'order', status: 'new' },
+    { id: 2, orderCategory: 'counterOrder', status: 'new' },
+    { id: 3, status: 'new' },
+    { id: 4, orderCategory: 'counterOrder', status: 'closed' },
+  ]
+  const result = getAllByOrderCategory(market, 'counterOrder')
+  expect(result).toStrictEqual([
+    { id: 2, orderCategory: 'counterOrder', status: 'new' },
+    { id: 4, orderCategory: 'counterOrder', status: 'closed' },
+  ])
+  const result2 = getAllByOrderCategory(market, 'order')
+  expect(result2).toStrictEqual([
+    { id: 1, orderCategory: 'order', status: 'new' },
+  ])
 })

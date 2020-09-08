@@ -1,12 +1,12 @@
 module.exports = {
   amountPerTransaction: 1,
-  minTradeAmountDiff: 750000,
+  minTradeAmountDiff: 75000,
   maxSpreadRate: 0.0018,
-  minProfitRate: 0.0001,
+  minProfitRate: 0.0002,
   maxLossRate: 0.001,
-  maxLossRateOfModifyOrder: 0.0005,
+  maxLossRateOfModifyOrder: 0.000025,
   orderTimeLimit: 10,
-  counterOrderTimeLimit: 30,
+  counterOrderTimeLimit: 120,
   markets: ['ETH-PERP'],
 }
 

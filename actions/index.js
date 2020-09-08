@@ -7,9 +7,9 @@ const { noPosi, isPosi } = require('../data/position')
 const { noOrder } = require('../data/order')
 const { isTickEmpty } = require('../data/tick')
 const { stopLoss } = require('./stopLoss')
-const { canModifyCounterOrder } = require('../rules/counterOrder')
-const { modifyCounterOrders } = require('../actions/counterOrder')
-const {isWaiting, setWait} = require('../data/statuses')
+const { canModifyCounterOrder } = require('../rules/modifyOrder')
+const { modifyCounterOrders } = require('../actions/modifyOrder')
+const { isWaiting, setWait } = require('../data/statuses')
 const { sleep } = require('../utils/sleep')
 
 const timeInterval = 500
@@ -25,6 +25,12 @@ const _actionsLoop = async (market) => {
 
 const __actionLoop = async (market) => {
   if (isTickEmpty(market)) return
+  if (noPosi(market) || isWaiting(market, 'modifyOrder')) {
+    setWait(market, 'modifyOrder', false)
+  }
+  if (noPosi(market) || isWaiting(market, 'stopLoss')) {
+    setWait(market, 'stopLoss', false)
+  }
   if (isPosi(market) || noOrder(market) || isWaiting(market, 'cancel')) {
     setWait(market, 'cancel', false)
   }
@@ -38,7 +44,7 @@ const __actionLoop = async (market) => {
   }
 
   // cancel order
-  if(!isWaiting(market, 'cancel')) {
+  if (!isWaiting(market, 'cancel')) {
     const pastOrders = canCancelOrder(market)
     if (pastOrders) {
       setWait(market, 'cancel', true)
@@ -58,10 +64,9 @@ const __actionLoop = async (market) => {
   }
 
   // modify counter order
-  // もし重複するなら、modifyOrder成功時に前の注文を手動closeさせる
   if (!isWaiting(market, 'modifyOrder') && !isWaiting(market, 'stopLoss')) {
     const counterOrderInfo = canModifyCounterOrder(market)
-    if (counterOrderInfo) {
+    if (counterOrderInfo && counterOrderInfo.length) {
       setWait(market, 'modifyOrder', true)
       await modifyCounterOrders(counterOrderInfo)
       await sleep(2000)

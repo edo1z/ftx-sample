@@ -27,13 +27,19 @@ exports.noOrder = (market) => {
   return !orders[market].find((order) => order.status != 'closed')
 }
 
+const closeById = (market, id) => {
+  const order = getById(market, id)
+  order.status = 'closed'
+}
+exports.closeById = closeById
+
 const getById = (market, id) => {
   return orders[market].find((order) => order.id === id)
 }
 exports.getById = getById
 
 exports.getAllByOrderCategory = (market, orderCateogry) => {
-  orders[market].filter((order) => order.orderCategory === orderCateogry)
+  return orders[market].filter((order) => order.orderCategory === orderCateogry)
 }
 
 exports.getOrderCategory = (market, id) => {
