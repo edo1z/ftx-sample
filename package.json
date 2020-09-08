@@ -1,12 +1,12 @@
 {
   "name": "ftx-sample",
   "version": "1.0.0",
-  "description": "",
+  "description": "FTX sample",
   "main": "main.js",
   "scripts": {
 		"test": "jest"
   },
-  "author": "",
+  "author": "edo1z",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.20.0",
